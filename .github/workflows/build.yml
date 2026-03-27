@@ -1,0 +1,40 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'specs/**']
+  pull_request:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'specs/**']
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Remort.sln
+
+      - name: Check formatting
+        run: dotnet format Remort.sln --verify-no-changes
+
+      - name: Build
+        run: dotnet build Remort.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Remort.sln --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/

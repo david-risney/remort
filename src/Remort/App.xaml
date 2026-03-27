@@ -1,0 +1,16 @@
+<Application x:Class="Remort.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:Remort.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/ThemeColors.xaml" />
+                <ResourceDictionary Source="Theme/ThemeStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:DisconnectedToBoolConverter x:Key="DisconnectedToBoolConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

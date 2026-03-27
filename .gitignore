@@ -1,0 +1,21 @@
+poc
+
+# .NET / C# build outputs
+bin/
+obj/
+*.user
+*.suo
+*.cache
+packages/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
