@@ -21,19 +21,27 @@ internal static partial class NativeMethods
     internal static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
     /// <summary>
-    /// Sends Win+Tab to invoke the host Windows Task View.
+    /// Opens the host Windows Task View using the Shell task view CLSID.
     /// </summary>
     internal static void SendTaskViewKeyPress()
     {
-        INPUT[] inputs =
-        [
-            CreateKeyDown(VK_LWIN),
-            CreateKeyDown(VK_TAB),
-            CreateKeyUp(VK_TAB),
-            CreateKeyUp(VK_LWIN),
-        ];
-
-        _ = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+        // Use the documented Task View shell CLSID. This works even when
+        // an RDP session has keyboard focus, unlike SendInput(Win+Tab).
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = "shell:::{3080F90E-D7AD-11D9-BD98-0000947B0257}",
+                UseShellExecute = false,
+            });
+        }
+#pragma warning disable CA1031 // Best-effort — don't crash if Task View fails to open
+        catch (System.ComponentModel.Win32Exception)
+#pragma warning restore CA1031
+        {
+            // Explorer not available or CLSID not supported.
+        }
     }
 
     private static INPUT CreateKeyDown(ushort vk)
