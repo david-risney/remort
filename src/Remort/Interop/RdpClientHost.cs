@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using Remort.Connection;
 
@@ -126,18 +127,28 @@ public sealed class RdpClientHost : AxHost, IRdpClient
                 "Ensure the control is sited in a WindowsFormsHost before calling this method.");
         }
 
-        dynamic advancedSettings = _ocx.AdvancedSettings9;
+        LogDiagnostic("ApplyDefaultSettings", $"OCX={_ocx != null}, IsHandleCreated={IsHandleCreated}, Width={Width}, Height={Height}, Server='{Server}'");
+
+        dynamic ocx = _ocx!;
+        dynamic advancedSettings = ocx.AdvancedSettings9;
         advancedSettings.EnableCredSspSupport = true;   // NLA
         advancedSettings.SmartSizing = true;
         advancedSettings.AuthenticationLevel = 2;       // Attempt authentication
         advancedSettings.RedirectSmartCards = true;      // Windows Hello / smart card credential redirect
 
         // ColorDepth is a top-level OCX property, not on AdvancedSettings
-        _ocx.ColorDepth = 32;
+        ocx.ColorDepth = 32;
+
+        LogDiagnostic("ApplyDefaultSettings", "OK");
     }
 
     /// <inheritdoc/>
-    public void Connect() => _ocx?.Connect();
+    public void Connect()
+    {
+        LogDiagnostic("Connect", $"OCX={_ocx != null}, IsHandleCreated={IsHandleCreated}, Width={Width}, Height={Height}, Server='{Server}', DesktopWidth={DesktopWidth}, DesktopHeight={DesktopHeight}");
+        _ocx?.Connect();
+        LogDiagnostic("Connect", "Call returned");
+    }
 
     /// <inheritdoc/>
     public void Disconnect()
@@ -199,5 +210,24 @@ public sealed class RdpClientHost : AxHost, IRdpClient
     {
         _sinkCookie?.Disconnect();
         _sinkCookie = null;
+    }
+
+    private static void LogDiagnostic(string method, string message)
+    {
+        try
+        {
+            string logPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Remort",
+                "rdp-diag.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+            File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] {method}: {message}{Environment.NewLine}");
+        }
+#pragma warning disable CA1031 // Diagnostics must not throw
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+            // If we can't log, we can't log.
+        }
     }
 }

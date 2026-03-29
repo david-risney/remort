@@ -81,6 +81,8 @@ public partial class DeviceWindowView : FluentWindow
 
         // Force layout so the WFH gets a window handle before the COM Connect() call.
         UpdateLayout();
+
+        System.Diagnostics.Debug.WriteLine($"[ConnectRequested] RdpHost.Visibility={RdpHost.Visibility}, RdpHost.ActualWidth={RdpHost.ActualWidth}, RdpHost.ActualHeight={RdpHost.ActualHeight}, Child={RdpHost.Child != null}, ChildHandle={_rdpClient.IsHandleCreated}, ChildSize={_rdpClient.Width}x{_rdpClient.Height}");
     }
 
     private void OnNavigated(NavigationView sender, NavigatedEventArgs args)

@@ -9,6 +9,7 @@ namespace Remort.Connection;
 public sealed class RetryingConnectionService : IConnectionService
 {
     private readonly IRdpClient _rdpClient;
+    private string _server = string.Empty;
 
     private int _currentAttempt;
     private int _maxAttempts;
@@ -41,8 +42,12 @@ public sealed class RetryingConnectionService : IConnectionService
     /// <inheritdoc/>
     public string Server
     {
-        get => _rdpClient.Server;
-        set => _rdpClient.Server = value;
+        get => _server;
+        set
+        {
+            _server = value;
+            _rdpClient.Server = value;
+        }
     }
 
     /// <inheritdoc/>
@@ -57,6 +62,11 @@ public sealed class RetryingConnectionService : IConnectionService
         _currentAttempt = 1;
 
         _rdpClient.ApplyDefaultSettings();
+
+        // Re-apply Server right before Connect — the OCX may ignore property sets
+        // before siting, so the value set in the Server setter earlier may be lost.
+        _rdpClient.Server = Server;
+
         AttemptStarted?.Invoke(this, new AttemptStartedEventArgs(_currentAttempt, _maxAttempts));
         _rdpClient.Connect();
     }
