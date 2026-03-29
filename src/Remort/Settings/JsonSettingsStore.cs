@@ -72,7 +72,6 @@ public sealed class JsonSettingsStore : ISettingsStore
 
     private static string GetDefaultFilePath()
     {
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "Remort", "settings.json");
+        return Path.Combine(AppDataDirectory.Path, "settings.json");
     }
 }

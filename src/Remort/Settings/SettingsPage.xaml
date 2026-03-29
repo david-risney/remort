@@ -1,0 +1,39 @@
+<Page x:Class="Remort.Settings.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:settings="clr-namespace:Remort.Settings"
+      Title="Settings">
+    <ScrollViewer Margin="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Settings"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,24" />
+
+            <!-- Theme -->
+            <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <RadioButton Content="Light"
+                         IsChecked="{Binding SelectedTheme, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static settings:AppTheme.Light}}"
+                         GroupName="Theme" Margin="0,0,0,4" />
+            <RadioButton Content="Dark"
+                         IsChecked="{Binding SelectedTheme, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static settings:AppTheme.Dark}}"
+                         GroupName="Theme" Margin="0,0,0,4" />
+            <RadioButton Content="System"
+                         IsChecked="{Binding SelectedTheme, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static settings:AppTheme.System}}"
+                         GroupName="Theme" Margin="0,0,0,16" />
+
+            <!-- DevBox -->
+            <TextBlock Text="DevBox" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <CheckBox Content="Enable automatic device discovery"
+                      IsChecked="{Binding DevBoxDiscoveryEnabled}"
+                      Margin="0,0,0,24" />
+
+            <!-- About -->
+            <TextBlock Text="About" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="Remort" FontSize="16" />
+            <TextBlock Text="{Binding AppVersion, StringFormat='Version {0}'}"
+                       Opacity="0.6" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

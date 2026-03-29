@@ -1,28 +1,22 @@
 using System.ComponentModel;
-using System.Net.Http;
 using System.Windows;
-using System.Windows.Interop;
-using Remort.Connection;
-using Remort.DevBox;
-using Remort.Interop;
+using Remort.Devices;
 using Remort.Settings;
-using Remort.Theme;
-using Remort.VirtualDesktop;
+using Wpf.Ui.Controls;
 
 namespace Remort;
 
 /// <summary>
-/// Main application window. Creates and wires the RDP host control and ViewModel.
+/// Main application window with NavigationView shell (Favorites, Devices, Settings).
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("IDisposable", "CA1001:Types that own disposable fields should be disposable", Justification = "Disposed in OnClosing, the WPF Window lifecycle equivalent of IDisposable.Dispose.")]
-public partial class MainWindow : Window
+public partial class MainWindow : FluentWindow
 {
-    private readonly MainWindowViewModel _viewModel;
-    private readonly DesktopSwitchDetector _desktopSwitchDetector;
-    private readonly DesktopSwitcherService _desktopSwitcherService;
-    private readonly ThemeService _themeService;
-    private readonly JsonSettingsStore _settingsStore;
-    private readonly JsonProfileStore _profileStore;
+    private readonly IDeviceStore _deviceStore;
+    private readonly DeviceWindowManager _deviceWindowManager;
+    private readonly ISettingsStore _settingsStore;
+    private readonly DevicesPageViewModel _devicesPageViewModel;
+    private readonly FavoritesPageViewModel _favoritesPageViewModel;
+    private readonly SettingsPageViewModel _settingsPageViewModel;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -31,110 +25,54 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        // Theme: apply saved profile before any controls render
-        _themeService = new ThemeService(System.Windows.Application.Current.Resources);
+        _deviceStore = new JsonDeviceStore();
         _settingsStore = new JsonSettingsStore();
-        _profileStore = new JsonProfileStore();
-        RestoreSavedTheme();
+        _deviceWindowManager = new DeviceWindowManager(CreateDeviceWindow);
 
-        var rdpClient = new RdpClientHost();
-        RdpHost.Child = rdpClient;
+        _devicesPageViewModel = new DevicesPageViewModel(_deviceStore, _deviceWindowManager);
+        _favoritesPageViewModel = new FavoritesPageViewModel(_deviceStore, _deviceWindowManager);
+        _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
 
-        var connectionService = new RetryingConnectionService(rdpClient);
+        NavigationView.Navigated += OnNavigated;
 
-        var authService = new MsalAuthenticationService();
-        var httpClient = new HttpClient();
-        var devBoxResolver = new DevBoxResolver(authService, httpClient);
-        var virtualDesktopService = new VirtualDesktopService();
-
-        _desktopSwitcherService = new DesktopSwitcherService();
-
-        _viewModel = new MainWindowViewModel(connectionService, devBoxResolver, _settingsStore, virtualDesktopService, _desktopSwitcherService);
-        DataContext = _viewModel;
-
-        _desktopSwitchDetector = new DesktopSwitchDetector(virtualDesktopService);
-        _desktopSwitchDetector.SwitchedToDesktop += OnSwitchedToDesktop;
-
-        SourceInitialized += OnSourceInitialized;
-        Microsoft.Win32.SystemEvents.SessionSwitch += OnSessionSwitch;
-
-        RdpHost.SizeChanged += (_, _) =>
-        {
-            rdpClient.DesktopWidth = (int)RdpHost.ActualWidth;
-            rdpClient.DesktopHeight = (int)RdpHost.ActualHeight;
-        };
+        Loaded += OnLoaded;
     }
 
     /// <inheritdoc/>
     protected override void OnClosing(CancelEventArgs e)
     {
-        SourceInitialized -= OnSourceInitialized;
-        Microsoft.Win32.SystemEvents.SessionSwitch -= OnSessionSwitch;
-
-        _desktopSwitchDetector.SwitchedToDesktop -= OnSwitchedToDesktop;
-        _desktopSwitchDetector.Dispose();
-
-        _desktopSwitcherService.StopMonitoring();
-        _desktopSwitcherService.Dispose();
-
-        if (_viewModel.DisconnectCommand.CanExecute(null))
-        {
-            _viewModel.DisconnectCommand.Execute(null);
-        }
-
+        _deviceWindowManager.CloseAll();
         base.OnClosing(e);
     }
 
-    private void OnSessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+    private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock
-            || e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLogon)
+        // Select Devices as the default page
+        if (NavigationView.MenuItems.Count > 1)
         {
-            Dispatcher.Invoke(() => _viewModel.TryAutoReconnect());
+            NavigationView.Navigate(typeof(DevicesPage));
         }
     }
 
-    private void OnSourceInitialized(object? sender, EventArgs e)
+    private void OnNavigated(NavigationView sender, NavigatedEventArgs args)
     {
-        var hwnd = new WindowInteropHelper(this).Handle;
-        _viewModel.SetWindowHandle(hwnd);
-        _desktopSwitchDetector.StartMonitoring(hwnd);
-        _desktopSwitcherService.StartMonitoring();
-    }
-
-    private void OnSwitchedToDesktop(object? sender, EventArgs e)
-    {
-        _viewModel.TryReconnectOnDesktopSwitch();
-    }
-
-    private void ThemeButton_Click(object sender, RoutedEventArgs e)
-    {
-        var viewModel = new ThemeSettingsViewModel(_themeService, _settingsStore, _profileStore);
-        var window = new ThemeSettingsWindow
+        if (args.Page is DevicesPage devicesPage)
         {
-            DataContext = viewModel,
-            Owner = this,
-        };
-        window.ShowDialog();
-    }
-
-    private void RestoreSavedTheme()
-    {
-        AppSettings settings = _settingsStore.Load();
-        if (string.IsNullOrEmpty(settings.ActiveProfileName))
-        {
-            return;
+            devicesPage.DataContext = _devicesPageViewModel;
+            _devicesPageViewModel.ShowAddDeviceDialog = devicesPage.ShowAddDeviceDialogAsync;
         }
-
-        ColorProfile? profile = PresetProfiles.All
-            .FirstOrDefault(p => string.Equals(p.Name, settings.ActiveProfileName, StringComparison.OrdinalIgnoreCase));
-
-        profile ??= _profileStore.LoadCustomProfiles()
-            .FirstOrDefault(p => string.Equals(p.Name, settings.ActiveProfileName, StringComparison.OrdinalIgnoreCase));
-
-        if (profile is not null)
+        else if (args.Page is FavoritesPage favoritesPage)
         {
-            _themeService.ApplyProfile(profile);
+            favoritesPage.DataContext = _favoritesPageViewModel;
         }
+        else if (args.Page is SettingsPage settingsPage)
+        {
+            settingsPage.DataContext = _settingsPageViewModel;
+        }
+    }
+
+    private DeviceWindow.DeviceWindowView CreateDeviceWindow(Device device)
+    {
+        return new DeviceWindow.DeviceWindowView(device, _deviceStore);
     }
 }

@@ -1,0 +1,40 @@
+<Page x:Class="Remort.DeviceWindow.ConnectionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Connection">
+    <ScrollViewer Margin="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Connection"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,24" />
+
+            <!-- Connect / Disconnect -->
+            <ui:Button Content="{Binding ButtonLabel}"
+                       Appearance="Primary"
+                       Icon="{ui:SymbolIcon PlugConnected24}"
+                       Command="{Binding ToggleConnectionCommand}"
+                       Margin="0,0,0,16" />
+
+            <!-- Status -->
+            <TextBlock Text="Status" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding StatusText}" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding SubstatusText}"
+                       Opacity="0.7"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,24" />
+
+            <!-- Connection Settings -->
+            <TextBlock Text="Auto-connect" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <CheckBox Content="Autoconnect on start"
+                      IsChecked="{Binding AutoconnectOnStart}"
+                      Margin="0,0,0,4" />
+            <CheckBox Content="Autoconnect when visible"
+                      IsChecked="{Binding AutoconnectWhenVisible}"
+                      Margin="0,0,0,4" />
+            <CheckBox Content="Start on startup"
+                      IsChecked="{Binding StartOnStartup}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

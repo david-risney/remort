@@ -1,0 +1,73 @@
+<ui:FluentWindow x:Class="Remort.DeviceWindow.DeviceWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:wf="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+        xmlns:dw="clr-namespace:Remort.DeviceWindow"
+        Title="{Binding WindowTitle}"
+        Width="900"
+        Height="700"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" Margin="8,0,0,0">
+                    <TextBlock Text="{Binding WindowTitle}"
+                               FontSize="13"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="300" />
+                    <ui:Button Margin="8,0,0,0"
+                               Icon="{ui:SymbolIcon ChevronDown24}"
+                               Command="{Binding ToggleViewCommand}"
+                               ToolTip="Toggle navigation / remote desktop view"
+                               Appearance="Secondary" />
+                    <ui:Button Margin="4,0,0,0"
+                               Icon="{ui:SymbolIcon DesktopFlow24}"
+                               Command="{Binding InvokeTaskViewCommand}"
+                               ToolTip="Open Task View" />
+                </StackPanel>
+            </ui:TitleBar.Header>
+        </ui:TitleBar>
+
+        <Grid Grid.Row="1">
+            <!-- Navigation view for settings pages -->
+            <ui:NavigationView x:Name="DeviceNavigationView"
+                               PaneDisplayMode="Left"
+                               IsBackButtonVisible="Collapsed"
+                               Visibility="{Binding IsRdpViewActive, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <ui:NavigationView.MenuItems>
+                    <ui:NavigationViewItem Content="Connection"
+                                           Icon="{ui:SymbolIcon PlugConnected24}"
+                                           TargetPageType="{x:Type dw:ConnectionPage}" />
+                    <ui:NavigationViewItem Content="General"
+                                           Icon="{ui:SymbolIcon Settings24}"
+                                           TargetPageType="{x:Type dw:GeneralPage}" />
+                    <ui:NavigationViewItem Content="Display"
+                                           Icon="{ui:SymbolIcon Desktop24}"
+                                           TargetPageType="{x:Type dw:DisplayPage}" />
+                    <ui:NavigationViewItem Content="Redirections"
+                                           Icon="{ui:SymbolIcon ArrowRouting24}"
+                                           TargetPageType="{x:Type dw:RedirectionsPage}" />
+                </ui:NavigationView.MenuItems>
+            </ui:NavigationView>
+
+            <!-- RDP host area — visible only in RDP mode -->
+            <Grid Visibility="{Binding IsRdpViewActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <wf:WindowsFormsHost x:Name="RdpHost" />
+                <TextBlock Text="Not connected"
+                           FontSize="18"
+                           Opacity="0.4"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           x:Name="RdpPlaceholder" />
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

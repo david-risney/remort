@@ -1,0 +1,21 @@
+<Page x:Class="Remort.DeviceWindow.RedirectionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Redirections">
+    <ScrollViewer Margin="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="480">
+            <TextBlock Text="Local Resources"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,24" />
+            <CheckBox Content="Clipboard" IsChecked="{Binding Clipboard}" Margin="0,0,0,8" />
+            <CheckBox Content="Printers" IsChecked="{Binding Printers}" Margin="0,0,0,8" />
+            <CheckBox Content="Drives" IsChecked="{Binding Drives}" Margin="0,0,0,8" />
+            <CheckBox Content="Audio playback" IsChecked="{Binding AudioPlayback}" Margin="0,0,0,8" />
+            <CheckBox Content="Audio recording" IsChecked="{Binding AudioRecording}" Margin="0,0,0,8" />
+            <CheckBox Content="Smart cards" IsChecked="{Binding SmartCards}" Margin="0,0,0,8" />
+            <CheckBox Content="Serial ports" IsChecked="{Binding SerialPorts}" Margin="0,0,0,8" />
+            <CheckBox Content="USB devices" IsChecked="{Binding UsbDevices}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
