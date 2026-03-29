@@ -21,27 +21,20 @@ internal static partial class NativeMethods
     internal static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
     /// <summary>
-    /// Opens the host Windows Task View using the Shell task view CLSID.
+    /// Opens the host Windows Task View by simulating Win+Tab.
+    /// Uses keybd_event which injects at a lower level than SendInput,
+    /// ensuring the keypress reaches the host OS even when an RDP session has focus.
     /// </summary>
     internal static void SendTaskViewKeyPress()
     {
-        // Use the documented Task View shell CLSID. This works even when
-        // an RDP session has keyboard focus, unlike SendInput(Win+Tab).
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = "shell:::{3080F90E-D7AD-11D9-BD98-0000947B0257}",
-                UseShellExecute = false,
-            });
-        }
-#pragma warning disable CA1031 // Best-effort — don't crash if Task View fails to open
-        catch (System.ComponentModel.Win32Exception)
-#pragma warning restore CA1031
-        {
-            // Explorer not available or CLSID not supported.
-        }
+        const byte vkLWin = 0x5B;
+        const byte vkTab = 0x09;
+        const uint keyUp = 0x0002;
+
+        KeybdEvent(vkLWin, 0, 0, UIntPtr.Zero);       // Win down
+        KeybdEvent(vkTab, 0, 0, UIntPtr.Zero);         // Tab down
+        KeybdEvent(vkTab, 0, keyUp, UIntPtr.Zero);     // Tab up
+        KeybdEvent(vkLWin, 0, keyUp, UIntPtr.Zero);    // Win up
     }
 
     private static INPUT CreateKeyDown(ushort vk)
@@ -61,6 +54,10 @@ internal static partial class NativeMethods
             Union = new INPUTUNION { Keyboard = new KEYBDINPUT { VirtualKey = vk, Flags = KEYEVENTF_KEYUP } },
         };
     }
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("user32.dll", EntryPoint = "keybd_event")]
+    private static extern void KeybdEvent(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct INPUT
