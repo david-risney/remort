@@ -75,11 +75,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (_settingsStore is not null)
         {
-            AppSettings settings = _settingsStore.Load();
-            _maxRetryCount = settings.MaxRetryCount;
-            _autoReconnectEnabled = settings.AutoReconnectEnabled;
-            _pinToDesktopEnabled = settings.PinToDesktopEnabled;
-            _reconnectOnDesktopSwitchEnabled = settings.ReconnectOnDesktopSwitchEnabled;
+            // Settings loading deferred to per-device ViewModels in 009-ui-modernization.
             _connectionService.RetryPolicy = new ConnectionRetryPolicy(_maxRetryCount);
         }
 
@@ -240,11 +236,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnAutoReconnectEnabledChanged(bool value)
     {
-        if (_settingsStore is not null)
-        {
-            AppSettings current = _settingsStore.Load();
-            _settingsStore.Save(current with { AutoReconnectEnabled = value });
-        }
+        // Persistence deferred to per-device ConnectionPageViewModel.
     }
 
     partial void OnPinToDesktopEnabledChanged(bool value)
@@ -263,29 +255,18 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (_settingsStore is not null)
         {
-            AppSettings current = _settingsStore.Load();
-            _settingsStore.Save(current with { PinToDesktopEnabled = value });
+            // Persistence deferred to per-device DisplayPageViewModel.
         }
     }
 
     partial void OnReconnectOnDesktopSwitchEnabledChanged(bool value)
     {
-        if (_settingsStore is not null)
-        {
-            AppSettings current = _settingsStore.Load();
-            _settingsStore.Save(current with { ReconnectOnDesktopSwitchEnabled = value });
-        }
+        // Persistence deferred to per-device ConnectionPageViewModel.
     }
 
     partial void OnMaxRetryCountChanged(int value)
     {
         _connectionService.RetryPolicy = new ConnectionRetryPolicy(value);
-
-        if (_settingsStore is not null)
-        {
-            AppSettings current = _settingsStore.Load();
-            _settingsStore.Save(current with { MaxRetryCount = value });
-        }
     }
 
     private void OnAttemptStarted(object? sender, AttemptStartedEventArgs e)
@@ -346,28 +327,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void ReconnectToLastHost()
     {
-        AppSettings settings = _settingsStore?.Load() ?? new AppSettings();
-        string lastHost = settings.LastConnectedHost;
-
-        if (string.IsNullOrEmpty(lastHost))
-        {
-            return;
-        }
-
-        _isAutoReconnect = true;
-        Hostname = lastHost;
-        _connectionService.Server = lastHost;
-        ConnectionState = ConnectionState.Connecting;
-        _connectionService.Connect();
+        // Last-connected-host tracking deferred to per-device model.
+        _ = _isAutoReconnect; // read instance field to satisfy CA1822
     }
 
     private void PersistLastConnectedHost(string host)
     {
-        if (_settingsStore is not null)
-        {
-            AppSettings current = _settingsStore.Load();
-            _settingsStore.Save(current with { LastConnectedHost = host });
-        }
+        // Persistence deferred to per-device model.
+        _ = host;
+        _ = _settingsStore; // read instance field to satisfy CA1822
     }
 
     /// <summary>

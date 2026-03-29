@@ -148,6 +148,25 @@ public sealed class RdpClientHost : AxHost, IRdpClient
         }
     }
 
+    /// <summary>
+    /// Captures the current RDP control content as a PNG screenshot.
+    /// </summary>
+    /// <param name="filePath">The full path to save the PNG file to.</param>
+    public void CaptureScreenshot(string filePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+
+        string? directory = System.IO.Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            System.IO.Directory.CreateDirectory(directory);
+        }
+
+        using var bitmap = new System.Drawing.Bitmap(Width, Height);
+        DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, Width, Height));
+        bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+    }
+
     internal void RaiseConnecting() => Connecting?.Invoke(this, EventArgs.Empty);
 
     internal void RaiseConnected() => Connected?.Invoke(this, EventArgs.Empty);

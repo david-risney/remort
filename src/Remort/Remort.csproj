@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.*" />
+    <PackageReference Include="WPF-UI" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,16 +1,26 @@
 <Application x:Class="Remort.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converters="clr-namespace:Remort.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Theme/ThemeColors.xaml" />
-                <ResourceDictionary Source="Theme/ThemeStyles.xaml" />
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:DisconnectedToBoolConverter x:Key="DisconnectedToBoolConverter" />
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+            <converters:BoolToZIndexConverter x:Key="BoolToZIndexConverter" />
+
+            <!-- Ensure all TextBlocks use the Wpf.Ui theme foreground in dark mode -->
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

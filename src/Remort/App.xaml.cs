@@ -1,6 +1,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using Remort.Settings;
+using Wpf.Ui.Appearance;
 
 namespace Remort;
 
@@ -10,8 +12,40 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        ArgumentNullException.ThrowIfNull(e);
+        ParseCommandLineArgs(e.Args);
+
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
+
+        ApplySavedTheme();
+    }
+
+    private static void ParseCommandLineArgs(string[] args)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], "--data-dir", StringComparison.OrdinalIgnoreCase))
+            {
+                AppDataDirectory.SetOverride(args[i + 1]);
+                break;
+            }
+        }
+    }
+
+    private static void ApplySavedTheme()
+    {
+        var settingsStore = new JsonSettingsStore();
+        AppSettings settings = settingsStore.Load();
+
+        ApplicationTheme theme = settings.Theme switch
+        {
+            AppTheme.Light => ApplicationTheme.Light,
+            AppTheme.Dark => ApplicationTheme.Dark,
+            _ => ApplicationTheme.Dark,
+        };
+
+        ApplicationThemeManager.Apply(theme);
     }
 
     private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
