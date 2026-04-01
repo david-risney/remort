@@ -17,6 +17,9 @@
             <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
             <converters:BoolToZIndexConverter x:Key="BoolToZIndexConverter" />
 
+            <!-- Override gradient separator in NavigationView with a solid line -->
+            <SolidColorBrush x:Key="LeftNavigationViewSeparatorBrush" Color="{DynamicResource DividerStrokeColorDefault}" />
+
             <!-- Ensure all TextBlocks use the Wpf.Ui theme foreground in dark mode -->
             <Style TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />

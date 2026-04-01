@@ -34,4 +34,20 @@ public partial class DevicesPage : Page
 
         return Task.FromResult<AddDeviceDialogViewModel?>(null);
     }
+
+    private void CardButton_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void MoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+
+        if (sender is FrameworkElement element && element.ContextMenu is not null)
+        {
+            element.ContextMenu.PlacementTarget = element;
+            element.ContextMenu.IsOpen = true;
+        }
+    }
 }

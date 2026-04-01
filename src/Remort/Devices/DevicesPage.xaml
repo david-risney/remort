@@ -31,27 +31,72 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type devices:DeviceCardViewModel}">
-                    <ui:CardAction Margin="4"
-                                   Width="220"
-                                   Height="140"
-                                   Command="{Binding OpenCommand}">
-                        <ui:CardAction.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Toggle Favorite" Command="{Binding ToggleFavoriteCommand}" />
-                                <Separator />
-                                <MenuItem Header="Remove Device" Command="{Binding RemoveCommand}" />
-                            </ContextMenu>
-                        </ui:CardAction.ContextMenu>
+                    <Button Margin="4"
+                            Width="220"
+                            Height="140"
+                            Command="{Binding OpenCommand}"
+                            Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="CardBorder"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        ClipToBounds="True">
+                                    <ContentPresenter HorizontalAlignment="Stretch"
+                                                      VerticalAlignment="Stretch" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="CardBorder" Property="Background"
+                                                Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                         <Grid>
                             <Border CornerRadius="8"
                                     Background="{Binding BackgroundBrush}"
                                     Opacity="0.3" />
-                            <ui:SymbolIcon Symbol="Star24"
-                                           Visibility="{Binding IsFavorite, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Top"
-                                           Margin="0,8,8,0"
-                                           FontSize="16" />
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="0,4,4,0">
+                                <Button Command="{Binding ToggleFavoriteCommand}"
+                                        Click="CardButton_Click"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Padding="4"
+                                        Cursor="Hand">
+                                    <ui:SymbolIcon Symbol="Star24" FontSize="16">
+                                        <ui:SymbolIcon.Style>
+                                            <Style TargetType="ui:SymbolIcon">
+                                                <Setter Property="Filled" Value="False" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                        <Setter Property="Filled" Value="True" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:SymbolIcon.Style>
+                                    </ui:SymbolIcon>
+                                </Button>
+                                <Button Click="MoreButton_Click"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Padding="4"
+                                        Cursor="Hand">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Toggle Favorite" Command="{Binding ToggleFavoriteCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="Remove Device" Command="{Binding RemoveCommand}" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                    <ui:SymbolIcon Symbol="MoreHorizontal24" FontSize="16" />
+                                </Button>
+                            </StackPanel>
                             <StackPanel VerticalAlignment="Bottom" Margin="12">
                                 <TextBlock Text="{Binding Name}"
                                            FontSize="16"
@@ -60,7 +105,7 @@
                                            MaxWidth="180" />
                             </StackPanel>
                         </Grid>
-                    </ui:CardAction>
+                    </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

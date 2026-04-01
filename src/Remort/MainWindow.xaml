@@ -20,7 +20,10 @@
             <ui:NavigationView x:Name="NavigationView"
                                Grid.Row="1"
                                PaneDisplayMode="Left"
-                               IsBackButtonVisible="Collapsed">
+                               OpenPaneLength="200"
+                               IsBackButtonVisible="Collapsed"
+                               IsTopSeparatorVisible="False"
+                               IsFooterSeparatorVisible="False">
                 <ui:NavigationView.MenuItems>
                     <ui:NavigationViewItem Content="Favorites"
                                            Icon="{ui:SymbolIcon Star24}"

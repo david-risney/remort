@@ -40,7 +40,10 @@
             <!-- Navigation view for settings pages -->
             <ui:NavigationView x:Name="DeviceNavigationView"
                                PaneDisplayMode="Left"
+                               OpenPaneLength="200"
                                IsBackButtonVisible="Collapsed"
+                               IsTopSeparatorVisible="False"
+                               IsFooterSeparatorVisible="False"
                                Visibility="{Binding IsRdpViewActive, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                 <ui:NavigationView.MenuItems>
                     <ui:NavigationViewItem Content="Connection"
